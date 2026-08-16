@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARA | المتجر الرسمي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8f9fa;
+            --bg-header: #ffffff;
+            --text-main: #111111;
+            --text-muted: #666666;
+            --border-color: #e5e5e5;
+            --accent-color: #d93856;
+            --shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; scroll-behavior: smooth; }
+        body { background-color: var(--bg-main); color: var(--text-main); padding-bottom: 60px; }
+
+        .top-bar { background-color: #000; color: #fff; text-align: center; padding: 8px 15px; font-size: 0.85rem; font-weight: 600; }
+
+        header {
+            background-color: var(--bg-header);
+            padding: 15px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .logo { font-size: 2rem; font-weight: 800; letter-spacing: 3px; color: #000; text-decoration: none; }
+
+        .cart-icon-btn {
+            background: #000; color: #fff; border: none; padding: 10px 18px; border-radius: 20px;
+            cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px;
+        }
+
+        .cart-count { background: var(--accent-color); color: #fff; font-size: 0.75rem; padding: 2px 7px; border-radius: 50%; }
+
+        nav {
+            background-color: #fff; display: flex; justify-content: center; gap: 20px;
+            padding: 12px 0; border-bottom: 1px solid var(--border-color); overflow-x: auto;
+        }
+        nav a { text-decoration: none; color: var(--text-main); font-size: 0.95rem; font-weight: 700; whitespace: nowrap; padding: 5px 10px; }
+        nav a:hover { color: var(--accent-color); }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+
+        .section-title {
+            font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;
+            border-right: 5px solid #000; padding-right: 12px; color: #111;
+        }
+
+        .products-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 25px; margin-bottom: 50px;
+        }
+
+        .product-card {
+            background: #fff; border: 1px solid var(--border-color); border-radius: 10px;
+            overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column;
+        }
+
+        .gallery-container { position: relative; width: 100%; height: 320px; background: #f0f0f0; }
+        .gallery-main { width: 100%; height: 100%; object-fit: cover; }
+
+        .gallery-thumbs { display: flex; justify-content: center; gap: 6px; padding: 8px; background: #fafafa; border-top: 1px solid var(--border-color); }
+        .gallery-thumbs img { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
+        .gallery-thumbs img.active { border-color: #000; }
+
+        .product-details { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
+        .product-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+        .product-price { font-size: 1.2rem; font-weight: 800; color: var(--accent-color); margin-bottom: 10px; }
+        
+        .fabric-info { font-size: 0.8rem; color: var(--text-muted); background: #f4f4f4; padding: 8px; border-radius: 5px; margin-bottom: 12px; line-height: 1.4; }
+
+        .size-selector { margin-bottom: 15px; }
+        .size-selector label { font-size: 0.8rem; font-weight: 700; display: block; margin-bottom: 5px; }
+        .size-options { display: flex; gap: 6px; flex-wrap: wrap; }
+        .size-btn { border: 1px solid #ccc; background: #fff; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; border-radius: 4px; font-weight: 600; }
+        .size-btn.selected { background: #000; color: #fff; border-color: #000; }
+
+        .btn-add { margin-top: auto; width: 100%; padding: 10px; background-color: #000; color: #fff; border: none; font-weight: 700; border-radius: 6px; cursor: pointer; }
+        .btn-add:hover { background-color: #333; }
+
+        .cart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .cart-content { background: #fff; width: 90%; max-width: 600px; max-height: 90vh; border-radius: 12px; padding: 25px; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 15px; left: 15px; font-size: 1.5rem; cursor: pointer; border: none; background: none; }
+        
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+        .cart-item-title { font-weight: 700; font-size: 0.95rem; }
+        .cart-item-meta { font-size: 0.8rem; color: var(--text-muted); }
+        .remove-btn { color: red; cursor: pointer; border: none; background: none; font-size: 0.85rem; }
+
+        .checkout-form { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; }
+
+        .btn-submit { background: #25D366; color: #fff; padding: 14px; border: none; border-radius: 6px; font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: 10px; text-align: center; }
+
+        footer { background: #000; color: #fff; text-align: center; padding: 20px; font-size: 0.85rem; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">شحن سريع لكافة المحافظات | خدمة العملاء متوفرة 24/7</div>
+
+    <header>
+        <a href="#" class="logo">ARA</a>
+        <button class="cart-icon-btn" onclick="openCart()">🛒 السلة <span class="cart-count" id="cartCount">0</span></button>
+    </header>
+
+    <nav>
+        <a href="#pajamas">بيجامات نسائي</a>
+        <a href="#shirts">قمصان رجالي</a>
+        <a href="#pants">بناطيل كلاسيك</a>
+        <a href="#accessories">سلاسل وإكسسوارات</a>
+    </nav>
+
+    <div class="container">
+        <h2 class="section-title" id="pajamas">قسم البيجامات النسائية</h2>
+        <div class="products-grid" id="pajamasGrid"></div>
+
+        <h2 class="section-title" id="shirts">قسم القمصان الرجالي الكلاسيك</h2>
+        <div class="products-grid" id="shirtsGrid"></div>
+
+        <h2 class="section-title" id="pants">قسم البناطيل الكلاسيك</h2>
+        <div class="products-grid" id="pantsGrid"></div>
+
+        <h2 class="section-title" id="accessories">قسم السلاسل والإكسسوارات</h2>
+        <div class="products-grid" id="accGrid"></div>
+    </div>
+
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <button class="close-modal" onclick="closeCart()">✕</button>
+            <h2 style="margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 8px;">سلة التسوق</h2>
+            <div id="cartItemsContainer"></div>
+            
+            <div style="margin-top: 15px; text-align: right; font-weight: 800; font-size: 1.1rem;" id="cartTotal">الإجمالي: 0 جنيه</div>
+
+            <form class="checkout-form" onsubmit="handleCheckout(event)">
+                <h3 style="margin-top: 10px; font-size: 1rem;">بيانات الشحن والطلب</h3>
+                <div class="form-group">
+                    <label>الاسم بالكامل:</label>
+                    <input type="text" id="custName" required placeholder="أدخل اسمك بالكامل">
+                </div>
+                <div class="form-group">
+                    <label>العنوان بالتفصيل:</label>
+                    <input type="text" id="custAddress" required placeholder="المحافظة، المدينة، الشارع">
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف:</label>
+                    <input type="tel" id="custPhone" required placeholder="01xxxxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label>طريقة الدفع الفضلة:</label>
+                    <select id="payMethod">
+                        <option value="فودافون كاش / أورنج كاش">فودافون كاش / أورنج كاش</option>
+                        <option value="تحويل بنكي">تحويل بنكي مباشر</option>
+                        <option value="الدفع عند الاستلام">الدفع عند الاستلام</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">إرسال الطلب عبر الواتساب 💬</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 متجر ARA - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <script>
+        const myPhone = "201011769781";
+        let cart = [];
+
+        // بيانات البيجامات بألوان زوايا مختلفة
+        const pajamasData = [
+            { id: 'pajama_1', name: 'بيجامة نسائي ستان - أزرق الملكي', price: 580, color: 'أزرق', fabric: 'حرير ستان ناعم عالي الجودة مع مقاومة للتجعد.', images: ['https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500', 'https://images.unsplash.com/photo-1584273143981-41c073dfe8f8?w=500', 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500'], sizes: ['S', 'M', 'L', 'XL'] },
+            { id: 'pajama_2', name: 'بيجامة نسائي - أحمر مخملي', price: 620, color: 'أحمر', fabric: 'قماش مخملي دافئ وناعم ومريح جداً للنوم.', images: ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500', 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500'], sizes: ['M', 'L', 'XL'] },
+            { id: 'pajama_3', name: 'بيجامة قطن - كحلي داكن', price: 520, color: 'كحلي', fabric: 'قطن 100% طبيعي ممشوط ومريح لجميع الأوقات.', images: ['https://images.unsplash.com/photo-1584273143981-41c073dfe8f8?w=500', 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500'], sizes: ['M', 'L', 'XL', '2XL'] },
+            { id: 'pajama_4', name: 'بيجامة حريمي - أسود فاخر', price: 650, color: 'أسود', fabric: 'ستان مع دانتيل راقي وتطريز على الأطراف.', images: ['https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500', 'https://images.unsplash.com/photo-1584273143981-41c073dfe8f8?w=500'], sizes: ['S', 'M', 'L'] },
+            { id: 'pajama_5', name: 'بيجامة حريمي - أخضر زمردي', price: 590, color: 'أخضر', fabric: 'ستان حرير درجة أولى بتصميم عصري وجذاب.', images: ['https://images.unsplash.com/photo-1584273143981-41c073dfe8f8?w=500', 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500'], sizes: ['M', 'L', 'XL'] }
+        ];
+
+        // بيانات القمصان الكلاسيك
+        const shirtsData = [
+            { id: 'shirt_1', name: 'قميص رجالي كلاسيك - أبيض نصعة', price: 350, fabric: 'قطن مصري 100% معالجة ضد الكرمشة سهلة الكوي.', images: ['https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=500', 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500'], sizes: ['39', '40', '41', '42', '43'] },
+            { id: 'shirt_2', name: 'قميص رجالي كلاسيك - أسود شيك', price: 360, fabric: 'قطن مخلوط خفيف ومثالي للمناسبات الرسمية والعمل.', images: ['https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500', 'https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=500'], sizes: ['39', '40', '41', '42'] },
+            { id: 'shirt_3', name: 'قميص رجالي كلاسيك - أزرق سماوي', price: 340, fabric: 'قطن أكسفورد ناعم ومتين مع لياقة كلاسيكية محددة.', images: ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500', 'https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=500'], sizes: ['40', '41', '42', '43', '44'] }
+        ];
+
+        // بيانات البناطيل الكلاسيك
+        const pantsData = [
+            { id: 'pant_1', name: 'بنطلون كلاسيك قماش - أسود', price: 450, fabric: 'صوف مخلوط إيطالي مع قصة رسمية مريحة وعملية.', images: ['https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500', 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500'], sizes: ['32', '34', '36', '38'] },
+            { id: 'pant_2', name: 'بنطلون كلاسيك كحلي داكن', price: 460, fabric: 'جابردين فاخر مقاوم للتجعد ومناسب للعمل اليومي.', images: ['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500', 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500'], sizes: ['30', '32', '34', '36', '38'] }
+        ];
+
+        // بيانات الإكسسوارات
+        const accData = [
+            { id: 'acc_1', name: 'سلسلة حريمي مطلية ذهب عيار 18', price: 220, fabric: 'ستانلس ستيل مضاد للصدأ وغير مسبب للحساسية.', images: ['https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500', 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500'], sizes: [] },
+            { id: 'acc_2', name: 'خاتم نسائي مرصع بالزركون الفاخر', price: 190, fabric: 'فضة استرليني 925 مطلية بالروديوم اللامع.', images: ['https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500', 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500'], sizes: ['6', '7', '8'] },
+            { id: 'acc_3', name: 'ساعة يد كلاسيكية أنيقة', price: 480, fabric: 'سوار من الجلد الطبيعي مع ماكينة يابانية دقيقة.', images: ['https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500', 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500'], sizes: [] }
+        ];
+
+        function renderGrid(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = items.map(p => `
+                <div class="product-card" id="card_${p.id}">
+                    <div class="gallery-container">
+                        <img id="img_${p.id}" src="${p.images[0]}" class="gallery-main" alt="${p.name}">
+                    </div>
+                    <div class="gallery-thumbs">
+                        ${p.images.map((img, idx) => `
+                            <img src="${img}" class="${idx === 0 ? 'active' : ''}" onclick="changeImg('${p.id}', '${img}', this)">
+                        `).join('')}
+                    </div>
+                    <div class="product-details">
+                        <div class="product-title">${p.name}</div>
+                        <div class="product-price">${p.price} جنيه</div>
+                        <div class="fabric-info">🧵 <strong>تفاصيل الخامة:</strong> ${p.fabric}</div>
+                        ${p.sizes.length > 0 ? `
+                            <div class="size-selector">
+                                <label>المقاس:</label>
+                                <div class="size-options">
+                                    ${p.sizes.map((s, idx) => `
+                                        <button class="size-btn ${idx === 0 ? 'selected' : ''}" onclick="selectSize(this)">${s}</button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <button class="btn-add" onclick="addToCart('${p.id}', '${p.name}', ${p.price})">إضافة إلى السلة 🛒</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeImg(productId, src, thumbEl) {
+            document.getElementById(`img_${productId}`).src = src;
+            let thumbs = thumbEl.parentElement.querySelectorAll('img');
+            thumbs.forEach(t => t.classList.remove('active'));
+            thumbEl.classList.add('active');
+        }
+
+        function selectSize(btn) {
+            let siblings = btn.parentElement.querySelectorAll('.size-btn');
+            siblings.forEach(s => s.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        function addToCart(id, name, price) {
+            let card = document.getElementById(`card_${id}`);
+            let sizeBtn = card.querySelector('.size-btn.selected');
+            let size = sizeBtn ? sizeBtn.innerText : 'بدون مقاس';
+
+            cart.push({ id, name, price, size });
+            updateCartCount();
+            alert(`تم إضافة "${name}" إلى السلة بنجاح!`);
+        }
+
+        function updateCartCount() {
+            document.getElementById('cartCount').innerText = cart.length;
+        }
+
+        function openCart() {
+            const container = document.getElementById('cartItemsContainer');
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding: 20px; color: #777;">السلة فارغة حالياً.</p>';
+            } else {
+                container.innerHTML = cart.map((item, index) => `
+                    <div class="cart-item">
+                        <div>
+                            <div class="cart-item-title">${item.name}</div>
+                            <div class="cart-item-meta">المقاس: ${item.size} | السعر: ${item.price} جنيه</div>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart(${index})">حذف 🗑️</button>
+                    </div>
+                `).join('');
+            }
+
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('cartTotal').innerText = `الإجمالي: ${total} جنيه`;
+            document.getElementById('cartModal').style.display = 'flex';
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartCount();
+            openCart();
+        }
+
+        function handleCheckout(e) {
+            e.preventDefault();
+            if (cart.length === 0) {
+                alert('سلتك فارغة!');
+                return;
+            }
+
+            const name = document.getElementById('custName').value;
+            const address = document.getElementById('custAddress').value;
+            const phone = document.getElementById('custPhone').value;
+            const payMethod = document.getElementById('payMethod').value;
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+            let itemsList = cart.map((item, i) => `${i+1}. ${item.name} (مقاس: ${item.size}) - ${item.price} ج`).join('\n');
+
+            let message = `مرحباً متجر ARA، أود تأكيد الطلب التالي:\n\n` +
+                          `📦 **المنتجات المطلوبة:**\n${itemsList}\n\n` +
+                          `💰 **الإجمالي:** ${total} جنيه مصري\n\n` +
+                          `👤 **بيانات العميل:**\n` +
+                          `- الاسم: ${name}\n` +
+                          `- العنوان: ${address}\n` +
+                          `- الهاتف: ${phone}\n` +
+                          `- طريقة الدفع: ${payMethod}\n\n` +
+                          `يرجى تزويدي برقم الحساب وتحويل المبلغ.`;
+
+            window.open(`https://wa.me/${myPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        window.onload = () => {
+            renderGrid('pajamasGrid', pajamasData);
+            renderGrid('shirtsGrid', shirtsData);
+            renderGrid('pantsGrid', pantsData);
+            renderGrid('accGrid', accData);
+        };
+    </script>
+</body>
+</html>
